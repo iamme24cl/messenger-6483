@@ -2,7 +2,7 @@
 
 /* Sets up the environment variables from your .env file*/
 require("dotenv").config();
-
+const jwt = require("jsonwebtoken");
 /**
  * Module dependencies.
  */
@@ -31,7 +31,14 @@ const server = http.createServer(app);
 
 const io = require("socket.io")(server);
 
-io.on("connection", (socket) => {
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  jwt.verify(token, process.env.SESSION_SECRET, (err, decoded) => {
+    if (err) return next(new Error("Unable to Authenticate"));
+    socket.token = decoded;
+    return next();
+  });
+}).on("connection", (socket) => {
   socket.on("go-online", (id) => {
     if (!onlineUsers.includes(id)) {
       onlineUsers.push(id);
