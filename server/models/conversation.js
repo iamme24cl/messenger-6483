@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const db = require("../db");
+const db = require("../db/db");
 const Message = require("./message");
 
 const Conversation = db.define("conversation", {});
