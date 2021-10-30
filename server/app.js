@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const session = require("express-session");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
 const db = require("./db");
-const { User } = require("./models");
+const { User } = require("./db/models");
 // create store for sessions to persist in database
 const sessionStore = new SequelizeStore({ db });
 

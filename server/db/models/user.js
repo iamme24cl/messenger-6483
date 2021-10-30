@@ -1,5 +1,5 @@
 const Sequelize = require("sequelize");
-const db = require("../db/db");
+const db = require("../db");
 const crypto = require("crypto");
 
 const User = db.define("user", {
