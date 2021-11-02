@@ -72,11 +72,20 @@ export const logout = (id) => async (dispatch) => {
 export const fetchConversations = () => async (dispatch) => {
   try {
     const { data } = await axios.get("/api/conversations");
-    dispatch(gotConversations(data));
+    console.log(dispatch(gotConversations(addReadStatus(data))));
   } catch (error) {
     console.error(error);
   }
 };
+
+const addReadStatus = (data) => {
+  return data.map((convo) => {
+    const unreadCount = convo.messages.filter(message => {
+      return message.senderId === convo.otherUser.id && message.readStatus === false;
+    }).length;
+    return {...convo, unreadCount: unreadCount};
+  })
+}
 
 const saveMessage = async (body) => {
   const { data } = await axios.post("/api/messages", body);
