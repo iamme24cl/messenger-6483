@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { FormControl, FilledInput } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
-import { postMessage } from "../../store/utils/thunkCreators";
+import { postMessage, updateReadStatus, fetchConversations } from "../../store/utils/thunkCreators";
+
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -20,7 +21,7 @@ const useStyles = makeStyles(() => ({
 const Input = (props) => {
   const classes = useStyles();
   const [text, setText] = useState("");
-  const { postMessage, otherUser, conversationId, user } = props;
+  const { postMessage, otherUser, conversationId, user, unreadCount } = props;
 
   const handleChange = (event) => {
     setText(event.target.value);
@@ -39,6 +40,17 @@ const Input = (props) => {
     setText("");
   };
 
+  const handleClick = async () => {
+    if (unreadCount > 0) {
+      const body = {
+        conversationId: conversationId,
+        senderId: otherUser.id
+      }
+      await props.updateReadStatus(body);
+    }
+    props.fetchConversations();
+  };
+
   return (
     <form className={classes.root} onSubmit={handleSubmit}>
       <FormControl fullWidth hiddenLabel>
@@ -49,6 +61,7 @@ const Input = (props) => {
           value={text}
           name="text"
           onChange={handleChange}
+          onFocus={handleClick}
         />
       </FormControl>
     </form>
@@ -60,6 +73,12 @@ const mapDispatchToProps = (dispatch) => {
     postMessage: (message) => {
       dispatch(postMessage(message));
     },
+    updateReadStatus: (body) => {
+      dispatch(updateReadStatus(body));
+    },
+    fetchConversations: () => {
+      dispatch(fetchConversations());
+    }
   };
 };
 
