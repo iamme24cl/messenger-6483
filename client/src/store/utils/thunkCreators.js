@@ -84,7 +84,7 @@ const addUnReadCount = (data) => {
     const unreadCount = convo.messages.filter(message => {
       return message.senderId === convo.otherUser.id && message.readStatus === false;
     }).length;
-    return {...convo, unreadCount: unreadCount, messageReadStatus: convo.latestMessageReadStatus };
+    return {...convo, unreadCount: unreadCount};
   })
 }
 
