@@ -19,9 +19,9 @@ router.get("/", async (req, res, next) => {
         },
       },
       attributes: ["id"],
-      order: [[Message, "createdAt", "ASC"]],
+      order: [[Message, "createdAt", "DESC"]],
       include: [
-        { model: Message, order: ["createdAt", "ASC"] },
+        { model: Message, order: ["createdAt", "DESC"] },
         {
           model: User,
           as: "user1",
@@ -68,7 +68,13 @@ router.get("/", async (req, res, next) => {
       }
 
       // set properties for notification count and latest message preview
-      convoJSON.latestMessageText = convoJSON.messages[convoJSON.messages.length - 1].text;
+      convoJSON.latestMessageText = convoJSON.messages[0].text;
+      
+      // find the id of the last message read by other user
+      const lastMsgRead = convoJSON.messages.find(msg => msg.senderId === userId && msg.readStatus === true);
+      convoJSON.lastMsgReadId = lastMsgRead ? lastMsgRead.id : -1;
+
+      convoJSON.messages.reverse();
       conversations[i] = convoJSON;
     }
 
@@ -77,5 +83,25 @@ router.get("/", async (req, res, next) => {
     next(error);
   }
 });
+
+router.put('/:conversationId/unread-messages', async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+
+    await Message.update(
+      {readStatus: true},
+      {where: {
+        conversationId: req.params.conversationId,
+        senderId: req.body.senderId,
+        readStatus: false
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+})
+
 
 module.exports = router;
