@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FormControl, FilledInput } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
-import { postMessage, updateReadStatus, fetchConversations } from "../../store/utils/thunkCreators";
+import { postMessage, updateReadStatus } from "../../store/utils/thunkCreators";
 
 
 const useStyles = makeStyles(() => ({
@@ -21,7 +21,7 @@ const useStyles = makeStyles(() => ({
 const Input = (props) => {
   const classes = useStyles();
   const [text, setText] = useState("");
-  const { postMessage, otherUser, conversationId, user, unreadCount } = props;
+  const { postMessage, conversation, user } = props;
 
   const handleChange = (event) => {
     setText(event.target.value);
@@ -32,23 +32,26 @@ const Input = (props) => {
     // add sender user info if posting to a brand new convo, so that the other user will have access to username, profile pic, etc.
     const reqBody = {
       text: event.target.text.value,
-      recipientId: otherUser.id,
-      conversationId,
-      sender: conversationId ? null : user
+      recipientId: conversation.otherUser.id,
+      conversationId: conversation.id,
+      sender: conversation.id ? null : user
     };
     await postMessage(reqBody);
     setText("");
   };
 
   const handleClick = async () => {
+    let unreadCount = conversation.messages.filter(message => {
+      return message.senderId === conversation.otherUser.id && message.readStatus === false;
+    }).length;
     if (unreadCount > 0) {
       const body = {
-        conversationId: conversationId,
-        senderId: otherUser.id
+        conversationId: conversation.id,
+        senderId: conversation.otherUser.id,
+        recipientId: user.id
       }
       await props.updateReadStatus(body);
     }
-    props.fetchConversations();
   };
 
   return (
@@ -76,9 +79,6 @@ const mapDispatchToProps = (dispatch) => {
     updateReadStatus: (body) => {
       dispatch(updateReadStatus(body));
     },
-    fetchConversations: () => {
-      dispatch(fetchConversations());
-    }
   };
 };
 
