@@ -73,20 +73,12 @@ export const logout = (id) => async (dispatch) => {
 export const fetchConversations = () => async (dispatch) => {
   try {
     const { data } = await axios.get("/api/conversations");
-    console.log(dispatch(gotConversations(addUnReadCount(data))));
+    dispatch(gotConversations(data));
   } catch (error) {
     console.error(error);
   }
 };
 
-const addUnReadCount = (data) => {
-  return data.map((convo) => {
-    const unreadCount = convo.messages.filter(message => {
-      return message.senderId === convo.otherUser.id && message.readStatus === false;
-    }).length;
-    return {...convo, unreadCount: unreadCount};
-  })
-}
 
 const saveMessage = async (body) => {
   const { data } = await axios.post("/api/messages", body);
@@ -128,24 +120,21 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
   }
 };
 
-const updateMessagesReadStatus = (conversationId, senderId) => {
-  socket.emit("update-messages-read-status", { conversationId, senderId })
+const sendMsgReadStatus = (conversationId, senderId, recipientId) => {
+  socket.emit("sendMsgReadStatus", { conversationId, senderId, recipientId });
 }
 
-const updateMessages = async (body) => {
-  const { data } = await axios.put("/api/messages", body);
-  return data;
+const updateMsgReadStatus = async (body) => {
+  await axios.put(`/api/conversations/${body.conversationId}/unread-messages`, body);
 };
 
 export const updateReadStatus = (body) => async (dispatch) => {
   try {
-    const data = await updateMessages(body);
-    console.log(data);
-    console.log(data.messages > 0);
-    if (data.messages > 0) {
-      dispatch(updateUnreadMessages(body.conversationId, body.senderId));
-      updateMessagesReadStatus(body.conversationId, body.senderId);
-    }
+    updateMsgReadStatus(body);
+  
+    dispatch(updateUnreadMessages(body.conversationId, body.senderId, true));
+    sendMsgReadStatus(body.conversationId, body.senderId, body.recipientId);
+   
   } catch (error) {
     console.error(error);
   }
