@@ -46,6 +46,22 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("sendMsgReadStatus", (data) => {
+    // Broadcast to the sender whose messages are just read
+    socket.broadcast.to(data.senderId).emit("sendMsgReadStatus", {
+      conversationId: data.conversationId,
+      senderId: data.senderId,
+      reduceCount: false,
+    });
+
+    // Broadcast to other logged in devices of the user that clicked the chat to read messages
+    socket.broadcast.to(data.recipientId).emit("sendMsgReadStatus", {
+      conversationId: data.conversationId,
+      senderId: data.senderId,
+      reduceCount: true,
+    });
+  });
+
   socket.on("logout", (id) => {
     if (onlineUsers.includes(id)) {
       userIndex = onlineUsers.indexOf(id);
