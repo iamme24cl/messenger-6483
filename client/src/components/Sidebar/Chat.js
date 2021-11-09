@@ -27,10 +27,8 @@ const Chat = (props) => {
   
   const handleClick = async (conversation) => {
     await props.setActiveChat(conversation.otherUser.username);
-    let unreadCount = conversation.messages.filter(message => {
-      return message.senderId === conversation.otherUser.id && message.readStatus === false;
-    }).length;
-    if (unreadCount > 0) {
+   
+    if (conversation.unreadCount > 0) {
       const body = {
         conversationId: conversation.id,
         senderId: conversation.otherUser.id,

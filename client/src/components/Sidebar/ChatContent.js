@@ -23,9 +23,8 @@ const useStyles = makeStyles((theme) => ({
 
 const ChatContent = (props) => {
   const { conversation } = props;
-  const { latestMessageText, otherUser } = conversation;
-  const unreadCount = conversation.messages.filter(message => message.senderId === otherUser.id && message.readStatus === false).length;
-
+  const { latestMessageText, otherUser, unreadCount } = conversation;
+  
   const styleProps = {unreadCount: unreadCount};
   const classes = useStyles(styleProps);
   
