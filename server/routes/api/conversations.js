@@ -86,8 +86,15 @@ router.get("/", async (req, res, next) => {
 
 router.put('/:conversationId/unread-messages', async (req, res, next) => {
   try {
+
     if (!req.user) {
       return res.sendStatus(401);
+    }
+    
+    const userId = req.user.id;
+    const { user1Id, user2Id } = await Conversation.findByPk(req.params.conversationId);
+    if (userId !== user1Id && userId !== user2Id) {
+      return res.sendStatus(403);
     }
 
     await Message.update(
