@@ -18,6 +18,7 @@ export const addMessageToStore = (state, payload) => {
       convoCopy.messages.push(message);
       convoCopy.latestMessageText = message.text;
       convoCopy.unreadCount = message.senderId === convo.otherUser.id ? convo.unreadCount +=1 : 0;
+      convoCopy.lastMsgReadId = message.senderId === convo.otherUser.id ? -1 : convo.lastMsgReadId;
       return convoCopy;
     } else {
       return convo;
@@ -83,36 +84,27 @@ export const addNewConvoToStore = (state, recipientId, message) => {
   });
 };
 
-export const updateUnreadMsgInStore = (state, payload) => {
- const { conversationId, senderId, reduceCount } = payload;
+export const updateUnreadMsgInStore = (state, conversationId,senderId) =>{
+  return state.map(convo =>{
+    if(convo.id === conversationId){
+      return {...convo, messages: 
+        convo.messages.map(message => 
+          message.senderId === senderId ? {...message, readStatus: true} : message), unreadCount: 0}
+    } else{
+      return convo
+    }
+  })
+}
 
- return state.map((convo) => {
-  if (convo.id === conversationId) {
-    const convoCopy = { ...convo };
-
-    let recipientLastReadId = -1;
-    let senderLastReadId = -1;
-    // Update readStatus of messages in convo whose senderId matches senderId
-    convoCopy.messages = convoCopy.messages.map((msg) => {
-      if (msg.senderId !== senderId && msg.readStatus === true) {
-        recipientLastReadId = msg.id;
-      }
-
-      if (msg.senderId === senderId && msg.readStatus === false) {
-        const msgCopy = { ... msg };
-        msgCopy.readStatus = true;
-        senderLastReadId = msgCopy.id;
-        return msgCopy;
-      } else {
-        return msg;
-      }
-    });
-
-    convoCopy.lastMsgReadId = reduceCount ? recipientLastReadId : senderLastReadId;
-    const unreadCount = convo.messages.filter(message => (message.senderId === convo.otherUser.id && !message.readStatus)).length;
-    return { ...convoCopy, unreadCount: unreadCount };
-  } else {
-    return convo;
-  }
- });
-};
+export const updateOtherUserRead = (state, conversationId, senderId) =>{
+  return state.map(convo =>{
+    if(convo.id === conversationId){
+      const curConvo = convo
+      return {...convo, messages: 
+        convo.messages.map(message => 
+          message.senderId === senderId ? {...message, readStatus: true} : message) , lastMsgReadId: curConvo.messages[curConvo.messages.length - 1].id}
+    } else{
+      return convo
+    }
+  })
+}

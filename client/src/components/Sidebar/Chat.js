@@ -32,7 +32,6 @@ const Chat = (props) => {
       const body = {
         conversationId: conversation.id,
         senderId: conversation.otherUser.id,
-        recipientId: user.id
       }
       await props.updateReadStatus(body);
     }

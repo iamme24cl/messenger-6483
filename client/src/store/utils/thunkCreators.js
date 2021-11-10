@@ -127,8 +127,8 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
   }
 };
 
-const sendMsgReadStatus = (conversationId, senderId, recipientId) => {
-  socket.emit("sendMsgReadStatus", { conversationId, senderId, recipientId });
+const sendMsgReadStatus = (conversationId, senderId) => {
+  socket.emit("sendMsgReadStatus", { conversationId, senderId });
 }
 
 const updateMsgReadStatus = async (body) => {
@@ -139,8 +139,8 @@ export const updateReadStatus = (body) => async (dispatch) => {
   try {
     updateMsgReadStatus(body);
   
-    dispatch(updateUnreadMessages(body.conversationId, body.senderId, true));
-    sendMsgReadStatus(body.conversationId, body.senderId, body.recipientId);
+    dispatch(updateUnreadMessages(body.conversationId, body.senderId));
+    sendMsgReadStatus(body.conversationId, body.senderId);
    
   } catch (error) {
     console.error(error);

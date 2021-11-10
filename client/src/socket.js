@@ -4,7 +4,7 @@ import {
   setNewMessage,
   removeOfflineUser,
   addOnlineUser,
-  updateUnreadMessages,
+  updateRecipientRead,
 } from "./store/conversations";
 
 const socket = io(window.location.origin);
@@ -24,7 +24,7 @@ socket.on("connect", () => {
   });
 
   socket.on("sendMsgReadStatus", (data) => {
-    store.dispatch(updateUnreadMessages(data.conversationId, data.senderId, data.reduceCount));
+    store.dispatch(updateRecipientRead(data.conversationId, data.senderId));
   });
 });
 
