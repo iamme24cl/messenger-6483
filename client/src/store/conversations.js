@@ -70,11 +70,11 @@ export const addConversation = (recipientId, newMessage) => {
 };
 
 // update messages in conversation when it is read
-export const updateUnreadMessages = (conversationId, senderId, reduceCount) => {
+export const updateUnreadMessages = (conversationId, senderId) => {
   return {
     type: UPDATE_UNREAD_MESSAGES,
-    payload: { conversationId, senderId, reduceCount }
-  }
+    payload: { conversationId, senderId }
+  };
 }
 
 // REDUCER
@@ -104,7 +104,8 @@ const reducer = (state = [], action) => {
     case UPDATE_UNREAD_MESSAGES: 
       return updateUnreadMsgInStore(
         state,
-        action.payload
+        action.payload.conversationId,
+        action.payload.senderId
       );
     default:
       return state;

@@ -24,7 +24,7 @@ socket.on("connect", () => {
   });
 
   socket.on("sendMsgReadStatus", (data) => {
-    store.dispatch(updateUnreadMessages(data.conversationId, data.senderId, data.reduceCount));
+    store.dispatch(updateUnreadMessages(data.conversationId, data.senderId));
   });
 });
 

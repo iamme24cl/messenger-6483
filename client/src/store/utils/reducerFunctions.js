@@ -18,6 +18,7 @@ export const addMessageToStore = (state, payload) => {
       convoCopy.messages.push(message);
       convoCopy.latestMessageText = message.text;
       convoCopy.unreadCount = message.senderId === convo.otherUser.id ? convo.unreadCount +=1 : 0;
+      convoCopy.lastMsgReadId = message.senderId === convo.otherUser.id ? -1 : convo.lastMsgReadId;
       return convoCopy;
     } else {
       return convo;
@@ -83,36 +84,28 @@ export const addNewConvoToStore = (state, recipientId, message) => {
   });
 };
 
-export const updateUnreadMsgInStore = (state, payload) => {
- const { conversationId, senderId, reduceCount } = payload;
+export const updateUnreadMsgInStore = (state, conversationId, senderId) =>{
+  return state.map(convo =>{
+    if (convo.id === conversationId) {
+      const convoCopy = { ...convo };
+      
+      // update readStatus of messages in convo whose senderId matches senderId
+      convoCopy.messages = convoCopy.messages.map((msg) => {
+        if (msg.senderId === senderId && msg.readStatus === false) {
+          const msgCopy = { ...msg };
+          msgCopy.readStatus = true;
+          return msgCopy;
+        } else {
+          return msg;
+        }
+      });
 
- return state.map((convo) => {
-  if (convo.id === conversationId) {
-    const convoCopy = { ...convo };
+      convoCopy.unreadCount = convoCopy.messages.filter(message => (message.senderId === convoCopy.otheUser.id && !message.readStatus)).length;
 
-    let recipientLastReadId = -1;
-    let senderLastReadId = -1;
-    // Update readStatus of messages in convo whose senderId matches senderId
-    convoCopy.messages = convoCopy.messages.map((msg) => {
-      if (msg.senderId !== senderId && msg.readStatus === true) {
-        recipientLastReadId = msg.id;
-      }
-
-      if (msg.senderId === senderId && msg.readStatus === false) {
-        const msgCopy = { ... msg };
-        msgCopy.readStatus = true;
-        senderLastReadId = msgCopy.id;
-        return msgCopy;
-      } else {
-        return msg;
-      }
-    });
-
-    convoCopy.lastMsgReadId = reduceCount ? recipientLastReadId : senderLastReadId;
-    const unreadCount = convo.messages.filter(message => (message.senderId === convo.otherUser.id && !message.readStatus)).length;
-    return { ...convoCopy, unreadCount: unreadCount };
-  } else {
-    return convo;
-  }
- });
+      return convoCopy;
+    } else {
+      return convo;
+    }
+  });
 };
+

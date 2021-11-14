@@ -73,19 +73,11 @@ export const logout = (id) => async (dispatch) => {
 export const fetchConversations = () => async (dispatch) => {
   try {
     const { data } = await axios.get("/api/conversations");
-    dispatch(gotConversations(addUnreadCount(data)));
+    dispatch(gotConversations(data));
   } catch (error) {
     console.error(error);
   }
 };
-
-const addUnreadCount = (data) => {
-  return data.map(convo => {
-    const unreadCount = convo.messages.filter(message => (message.senderId === convo.otherUser.id && !message.readStatus)).length;
-    return { ...convo, unreadCount: unreadCount }
-  })
-}
-
 
 const saveMessage = async (body) => {
   const { data } = await axios.post("/api/messages", body);
@@ -127,8 +119,11 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
   }
 };
 
-const sendMsgReadStatus = (conversationId, senderId, recipientId) => {
-  socket.emit("sendMsgReadStatus", { conversationId, senderId, recipientId });
+const sendMsgReadStatus = (data) => {
+  socket.emit("sendMsgReadStatus", { 
+    conversationId: data.conversationId,
+    senderId: data.senderId
+  });
 }
 
 const updateMsgReadStatus = async (body) => {
@@ -137,10 +132,10 @@ const updateMsgReadStatus = async (body) => {
 
 export const updateReadStatus = (body) => async (dispatch) => {
   try {
-    updateMsgReadStatus(body);
+    await updateMsgReadStatus(body);
   
-    dispatch(updateUnreadMessages(body.conversationId, body.senderId, true));
-    sendMsgReadStatus(body.conversationId, body.senderId, body.recipientId);
+    dispatch(updateUnreadMessages(body.conversationId, body.senderId));
+    sendMsgReadStatus(body);
    
   } catch (error) {
     console.error(error);
