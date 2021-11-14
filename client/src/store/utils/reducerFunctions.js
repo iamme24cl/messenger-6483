@@ -84,27 +84,28 @@ export const addNewConvoToStore = (state, recipientId, message) => {
   });
 };
 
-export const updateUnreadMsgInStore = (state, conversationId,senderId) =>{
+export const updateUnreadMsgInStore = (state, conversationId, senderId) =>{
   return state.map(convo =>{
-    if(convo.id === conversationId){
-      return {...convo, messages: 
-        convo.messages.map(message => 
-          message.senderId === senderId ? {...message, readStatus: true} : message), unreadCount: 0}
-    } else{
-      return convo
-    }
-  })
-}
+    if (convo.id === conversationId) {
+      const convoCopy = { ...convo };
+      
+      // update readStatus of messages in convo whose senderId matches senderId
+      convoCopy.messages = convoCopy.messages.map((msg) => {
+        if (msg.senderId === senderId && msg.readStatus === false) {
+          const msgCopy = { ...msg };
+          msgCopy.readStatus = true;
+          return msgCopy;
+        } else {
+          return msg;
+        }
+      });
 
-export const updateOtherUserRead = (state, conversationId, senderId) =>{
-  return state.map(convo =>{
-    if(convo.id === conversationId){
-      const curConvo = convo
-      return {...convo, messages: 
-        convo.messages.map(message => 
-          message.senderId === senderId ? {...message, readStatus: true} : message) , lastMsgReadId: curConvo.messages[curConvo.messages.length - 1].id}
-    } else{
-      return convo
+      convoCopy.unreadCount = convoCopy.messages.filter(message => (message.senderId === convoCopy.otheUser.id && !message.readStatus)).length;
+
+      return convoCopy;
+    } else {
+      return convo;
     }
-  })
-}
+  });
+};
+

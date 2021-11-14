@@ -47,10 +47,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMsgReadStatus", (data) => {
-    // Broadcast to the sender whose messages are just read
-    socket.broadcast.to(data.senderId).emit("sendMsgReadStatus", {
-      conversationId: data.conversationId,
-      senderId: data.senderId,
+    socket.broadcast.emit("sendMsgReadStatus", {
+      conversation: data.conversationId,
+      senderId: data.senderId
     });
   });
 

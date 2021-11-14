@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FormControl, FilledInput } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
-import { postMessage, updateReadStatus } from "../../store/utils/thunkCreators";
+import { postMessage, updateReadStatus, fetchConversations } from "../../store/utils/thunkCreators";
 
 
 const useStyles = makeStyles(() => ({
@@ -44,9 +44,10 @@ const Input = (props) => {
     if (conversation.unreadCount > 0) {
       const body = {
         conversationId: conversation.id,
-        senderId: conversation.otherUser.id,
+        senderId: conversation.otherUser.id
       }
       await props.updateReadStatus(body);
+      await props.fetchConversations();
     }
   };
 
@@ -75,6 +76,9 @@ const mapDispatchToProps = (dispatch) => {
     updateReadStatus: (body) => {
       dispatch(updateReadStatus(body));
     },
+    fetchConversations: () => {
+      dispatch(fetchConversations());
+    }
   };
 };
 
