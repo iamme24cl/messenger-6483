@@ -2,6 +2,13 @@
 
 A one-to-one realtime chat app.
 
+## ScreenShots :sunny:
+![login page](/images/login.png)
+
+![signup page](/images/signup.png)
+
+![home page](/images/home.png)
+---
 
 ## Initial Setup
 
